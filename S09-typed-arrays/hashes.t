@@ -1,7 +1,7 @@
 use v6;
 use Test;
 
-plan 47;
+plan 48;
 
 # L<S09/Typed arrays>
 
@@ -134,6 +134,23 @@ subtest 'self-referential top-level hash assignment' => {
     my %h := Hash[Int,Any].new;
     dies-ok { %h<a> = "b" }, 'typecheck on assignment';
     dies-ok { %h<a> := "b" }, 'typecheck on binding';
+}
+
+# old-issue-tracker#6176
+{
+    my %h{Str(Cool)} = a => 42;
+    isa-ok( %h.keys[0], Str, "Key coerced to Str");
+    is( %h.keys[0], 'a', "Correct key" );
+    %h{42} = 'a';
+    isa-ok( %h.keys[0], Str, "Numeric key coerced to Str");
+    is( %h.keys.grep(/\d/)[0], 42, "Correct numeric key" );
+
+    my %hh{Int(Str)} = 42 => 'a';
+    isa-ok( %hh.keys[0], Int, "Key coerced to Int");
+    is( %hh.keys[0], 42, "Correct key" );
+    %hh<a> = 33;
+    say %hh<a>;
+
 }
 
 # vim: expandtab shiftwidth=4
